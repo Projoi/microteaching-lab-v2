@@ -1,0 +1,81 @@
+<%- include('./layouts/header'); -%>
+
+<main class="px-[20%] bg-[#fafafa] min-h-screen flex items-center justify-center">
+  <form id="form-login" class="rounded-lg overflow-hidden border border-gray-300 bg-white grid grid-cols-1 md:grid-cols-2" novalidate>
+    <div class="bg-[#a382b6] flex items-center justify-center">
+      <img src="/img/logo.png" width="200px" alt="Virtual Lab Logo" />
+    </div>
+    <div class="flex flex-col items-center justify-center p-8">
+      <p class="text-black/80 font-thin mb-4 text-lg">- Tour Virtual Lab -</p>
+      <h1 class="font-semibold text-2xl mb-1">Sign In</h1>
+      <p class="text-sm text-black/60">untuk melanjutkan ke <strong>virtual lab</strong></p>
+
+      <div class="mt-8 w-full max-w-[300px]">
+        <div class="relative mb-3">
+            <input required value="" name="email" type="email" id="email" class="block px-2.5 pb-1 pt-4 w-[300px] text-sm text-gray-900 bg-transparent rounded-lg border-1 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer" placeholder=" " />
+            <label for="email" class="absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white dark:bg-gray-900 px-2 peer-focus:px-2 peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1">Email</label>
+        </div>
+        <div class="relative">
+            <input required value="" name="password" type="password" id="password" class="block px-2.5 pb-1 pt-4 w-[300px] text-sm text-gray-900 bg-transparent rounded-lg border-1 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer" placeholder=" " />
+            <label for="password" class="absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white dark:bg-gray-900 px-2 peer-focus:px-2 peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1">Password</label>
+        </div>
+
+        <button
+          type="submit"
+          class="mt-6 w-full text-white font-semibold text-sm px-4 py-2.5 bg-blue-500 hover:bg-blue-600 rounded-full transition"
+        >
+          Masuk
+        </button>
+
+        <p class="text-xs mt-4 text-center">
+          Belum punya akun? <a href="/daftar" class="text-blue-500 hover:underline">Daftar</a>
+        </p>
+
+        <p id="error-message" class="text-red-500 text-xs mt-3 text-center hidden"></p>
+      </div>
+    </div>
+  </form>
+</main>
+
+<%- include('./layouts/footer'); -%>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const form = document.getElementById("form-login");
+  const errorMessage = document.getElementById("error-message");
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    errorMessage.classList.add("hidden");
+
+    const email = form.email.value.trim();
+    const password = form.password.value.trim();
+
+    if (!email || !password) {
+      errorMessage.textContent = "Email dan password wajib diisi.";
+      errorMessage.classList.remove("hidden");
+      return;
+    }
+
+    try {
+      const res = await fetch("/api/students/login", {
+        method: "POST",
+        body: new URLSearchParams({ email, password }),
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+      });
+
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.message || "Gagal login.");
+      }
+
+      window.location.href = "/virtuallab/index.htm";
+    } catch (err) {
+      errorMessage.textContent = err.message;
+      errorMessage.classList.remove("hidden");
+    }
+  });
+});
+</script>

@@ -1,0 +1,44 @@
+<div class="sticky top-0 col-span-2 bg-[#a382b6] h-screen">
+    <div class="flex flex-col items-center h-full">
+        <img src="/img/logo.png" width="120px" alt="" class="py-4">
+
+        <!-- Gunakan justify-between agar atas & bawah terpisah -->
+        <div class="flex flex-col justify-between w-full flex-grow">
+            <div class="flex flex-col">
+                <a href="/admin" class="py-2.5 font-medium flex items-center gap-2 px-6 <%= activePage === 'konten' ? 'bg-gray-100 text-black' : 'text-white' %>">
+                    <i class="text-2xl uil uil-document-layout-left"></i> Konten
+                </a>
+
+                <a href="/admin/upload" class="py-2.5 font-medium flex items-center gap-2 px-6 <%= activePage === 'upload' ? 'bg-gray-100 text-black' : 'text-white' %>">
+                    <i class="text-2xl uil uil-video"></i> Upload Video
+                </a>
+            </div>
+            <!-- Ini akan terdorong ke paling bawah -->
+            <button id="logoutBtn" class="mb-3 py-2.5 font-medium flex items-center gap-2 px-6 text-white">
+                <i class="text-2xl uil uil-signout"></i> Keluar
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.getElementById('logoutBtn').addEventListener('click', async (e) => {
+        e.preventDefault();
+        try {
+            const res = await fetch('/api/admins/logout', {
+                method: 'POST',
+                credentials: 'include' // penting untuk mengirim cookie
+            });
+
+            if (res.ok) {
+                window.location.href = '/admin/login'; // redirect ke login page
+            } else {
+                const data = await res.json();
+                alert('Logout gagal: ' + (data.message || 'Terjadi kesalahan'));
+            }
+        } catch (err) {
+            console.error('Logout error:', err);
+            alert('Terjadi kesalahan jaringan.');
+        }
+    });
+</script>

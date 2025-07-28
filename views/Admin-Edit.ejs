@@ -1,0 +1,373 @@
+<%- include('./layouts/header'); -%>
+
+<style>
+    .shadow-brutal{
+        box-shadow: 0 0 60px rgba(0, 0, 0, .1);
+    }
+</style>
+
+<div class="grid grid-cols-10">
+    <%- include('./layouts/sidebar'); -%>
+    
+    <main class="col-span-8 px-[2.5%] my-8">
+        <div class="flex items-center justify-between mb-6">
+            <div class="flex items-center gap-4">
+                <p class="text-2xl font-bold"><i class="uil uil-sliders-v-alt"></i> Mengatur Video</p>
+                <p id="video-public" class="hidden px-4 py-1 rounded-full text-sm font-medium bg-green-500 text-white items-center gap-2"><i class="uil uil-globe"></i> Public</p>
+                <p id="video-private" class="hidden px-4 py-1 rounded-full text-sm font-medium bg-red-400 text-white items-center gap-2"><i class="uil uil-lock"></i> Private</p>
+            </div>
+            <div class="flex justify-self-end gap-4">
+                <button id="button-edit-video" class="text-white bg-blue-500 px-8 py-2 rounded-lg font-medium text-sm">Edit Video</button>
+                <div class="flex items-center gap-4">
+                    <button id="button-private-video" class="hidden text-white bg-red-500 px-8 py-2 rounded-lg font-medium text-sm">Private this Video</button>
+                    <button id="button-public-video" class="hidden text-white bg-green-500 px-8 py-2 rounded-lg font-medium text-sm">Go Public</button>
+                    <a href="" target="_blank" id="preview" class="text-sm px-6 py-2 rounded-lg text-blue-500 font-medium"><i class="uil uil-external-link-alt font-medium"></i> Preview</a>
+                </div>
+            </div>
+        </div>
+        <div class="grid grid-cols-8 gap-6">
+            <div class="col-span-8 lg:col-span-5">
+                <video id="video" width="320" height="240" controls class="shadow-brutal w-full aspect-video border rounded-2xl border-gray-300 ">
+                    <source src="" type="video/mp4">
+                    Your browser does not support the video tag.
+                </video>
+                <div class="mt-2">
+                    <h2 id="title" class="text-2xl font-bold text-black/80">Video Title Kinda Long but No Problem</h2>
+                    <p id="user" class="text-black/60 text-sm">User who upload</p>
+                    <div class="p-4 rounded-2xl w-full bg-gray-300/50 mt-4">
+                        <div class="flex items-center gap-2">
+                            <!-- <p class="font-semibold text-black/80 text-sm"><span id="views">100</span>x ditonton</p> -->
+                            <p class="font-medium text-black/70 text-sm">Diunggah: <span id="postdate">1 bulan lalu</span></p>
+                        </div>
+                        <p id="desc" class="mt-6">Lorem ipsum dolor sit, amet consectetur adipisicing elit. Maxime ad rerum laboriosam, inventore labore quia nihil animi minus tempore officiis assumenda debitis eveniet molestiae ipsum, dolor amet porro beatae exercitationem ratione. Dolor minus hic eligendi tempore praesentium distinctio cum quas.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- COMMENT SECTION -->
+            <div id="comments-section" class="col-span-8 lg:col-span-3 overflow-y-scroll h-[80vh] border border-gray-300 rounded-2xl py-4 divide-y">
+                <p class="px-4 font-medium text-lg text-black/80 mb-4">Comments Sections</p>
+
+                <!-- LIST OF COMMENT -->
+                <div id="comment" class="flex flex-col">
+                    <!-- COMMENT -->
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<div id="popup-edit-video" class="hidden fixed top-0 bottom-0 right-0 left-0 bg-black/40 flex items-center justify-center z-[99]">
+    <form id="form-edit-video" class="w-[90vw] lg:w-[60vw] bg-white rounded-2xl overflow-hidden">
+
+        <input type="file" name="upload_thumbnail" id="upload-thumbnail" class="hidden" accept="image/*">
+
+        <div class="text-white bg-[#a382b6] flex justify-between items-center px-8 lg:px-14 py-3">
+            <p class="text-xl font-bold">Edit Video</p>
+            <button type="button" id="button-close-edit"><i class="uil uil-multiply text-2xl"></i></button>
+        </div>
+
+        <hr>
+
+        <div class="py-4 mt-6 px-8 lg:px-14 flex flex-col gap-4 overflow-y-scroll h-[70vh]">
+            <div class="relative">
+                <input value="" name="title" type="text" id="edit-video-title" class="block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border-1 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer" placeholder=" " />
+                <label for="edit-video-title" class="absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white dark:bg-gray-900 px-2 peer-focus:px-2 peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1">Judul (wajib diisi)</label>
+            </div>
+
+
+            <div class="relative">
+                <textarea name="description" type="text" maxlength="1000" rows="8" id="edit-video-desc" class="text-sm block px-2.5 pb-2.5 pt-4 w-full text-base text-gray-900 bg-transparent rounded-lg border-1 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer" placeholder=" "> </textarea>
+                <label for="edit-video-desc" class="absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white dark:bg-gray-900 px-2 peer-focus:px-2 peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1">Deskripsi video</label>
+            </div>
+
+            <div class="">
+                <p class="font-medium">Thumbnail</p>
+                <p class="text-sm text-black/60 pt-2 pb-5">Pilih atau upload gambar yang menunjukkan isi video Anda. Thumbnail yang bagus akan terlihat unik dan menarik perhatian penonton.</p>
+                <p id="file-too-large-thumbnail" class="hidden text-red-500 font-medium text-sm pb-4">File too large, max thumbnail size 2mb</p>
+                <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                    <button type="button" id="button-upload-thumbnail" class="flex flex-col items-center justify-center border border-gray-300 rounded-lg p-4">
+                        <i class="uil uil-image-upload text-base lg:text-2xl text-black/70"></i>
+                        <p class="text-xs lg:text-sm font-medium text-black/70">Upload thumbnail</p>
+                    </button>
+                    <div id="thumbnail-placeholder" class="">
+                        <img id="edit-video-thumbnail" src="/img/Placeholder.png" class="h-full aspect-video rounded-md object-cover border" alt="">
+                    </div>
+                </div>
+            </div>
+
+            <div class="">
+                <p class="font-medium">Komentar</p>
+                <p class="text-sm text-black/60 pt-2 pb-4">Tentukan apakah video ini dapat dikomentari oleh orang lain.</p>
+                <div class="flex flex-col gap-2 ms-2">
+                    <div class="flex items-center gap-2">
+                        <input checked type="radio" name="can_comment" id="radio-komen-ya" value="true">
+                        <label class="font-medium text-black/80" for="radio-komen-ya">Ya, video ini bisa dikomentari</label>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <input type="radio" name="can_comment" id="radio-komen-tidak" value="false">
+                        <label class="font-medium text-black/80" for="radio-komen-tidak">Tidak, tutup komentar video</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex justify-end mt-8 pb-6">
+                <button id="button-save-edit" type="button" class="text-white font-semibold text-sm px-8 py-2.5 bg-blue-500">SIMPAN PERUBAHAN</button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<%- include('./layouts/footer'); -%>
+
+<script>
+    $("#form-seacrh").hide()
+    const ID = (window.location.href).split("video=").pop()
+    $("#preview").prop("href", `/watch?video=${ID}`)
+    
+    $.get(`/api/videos/${ID}`, function(response) {
+        // Akses data video dari response.video
+        const videoData = response.video;
+        
+        let description = videoData.description.split('\n')
+
+        if(videoData.can_watch == true){
+            $("#video-public").removeClass("hidden")
+            $("#button-private-video").removeClass("hidden")
+        }else{
+            $("#video-private").removeClass("hidden")
+            $("#button-public-video").removeClass("hidden")
+        }
+
+        $("#video source").prop("src", videoData.video_link)
+        $("#video")[0].load()
+        const safeTitle = escapeHTML(videoData.title)
+        $("#title").text(safeTitle.length > 90 ? `${safeTitle.substring(0,90)}...` : safeTitle)
+        $("#edit-video-title").val(safeTitle)
+        
+        // $("#views").text(videoData.views)
+        $("#desc").html(description.map(line => escapeHTML(line)).join("<br>"))
+        $("#edit-video-desc").val(videoData.description)
+        $("#postdate").text(waktuTerakhir(videoData.createdAt))
+        $("#user").text(videoData.Admin ? videoData.Admin.username : 'Admin')
+        $("#edit-video-thumbnail").prop("src", videoData.thumbnail || '/img/Placeholder.png')
+        $(`input[name=can_comment][value=${videoData.can_comment}]`).prop("checked", true)
+
+        // Load comments
+        loadComments(ID, videoData.can_comment);
+        
+    }).fail(function(xhr, status, error) {
+        console.error('Error fetching video data:', error);
+        alert('Gagal memuat data video');
+    });
+
+    function loadComments(videoId, canComment) {
+        if(canComment == false || canComment == "false"){
+            $("#comment").html("")
+            $("#comment").append(`<p class="mt-8 text-center text-sm">Video ini tidak dapat dikomentari</p>`)
+        } else {
+            $.get(`/api/videos/comments?video=${videoId}`, function(response){
+                // Pastikan response adalah array atau akses property yang sesuai
+                const commentData = Array.isArray(response) ? response : (response.comments || []);
+                
+                $("#comment").html(""); // Clear existing comments
+                
+                if(commentData.length !== 0){
+                    commentData.forEach(comment => {
+                        $("#comment").append(`
+                            <div class="px-4 py-2 flex justify-between gap-4 group hover:bg-gray-300">
+                                <div class="">
+                                    <p class="text-xs text-black/60">${escapeHTML(waktuTerakhir(comment.createdAt))}</p>
+                                    <p class="font-medium text-black/80">${escapeHTML(comment.student_email || comment.user_email || 'Unknown User')}</p>
+                                    <p class="text-sm">${escapeHTML(comment.content)}</p>
+                                </div>
+                                <p class="hidden">${escapeHTML(comment.id)}</p>
+                                <i class="button-delete-comment group-hover:visible invisible uil uil-trash-alt text-xl cursor-pointer"></i>
+                            </div>
+                        `)
+                    });
+
+                } else {
+                    $("#comment").append(`<p class="mt-8 text-center text-sm">Belum ada komentar</p>`)
+                }
+            }).fail(function(xhr, status, error) {
+                console.error('Error fetching comments:', error);
+                $("#comment").append(`<p class="mt-8 text-center text-sm text-red-500">Gagal memuat komentar</p>`)
+            });
+        }
+    }
+
+    $("#button-private-video").click(function(){
+        let isSure = confirm("Apakah anda yakin ingin membuat video ini menjadi private, artinya video tidak akan muncul pada papan virtual lab")
+        if(isSure){
+            const formData = new FormData()
+            formData.append("can_watch", false)
+            $.ajax({
+                url: `/api/videos/${ID}`,
+                type: "PUT",
+                data: formData,
+                async: false,
+                cache: false,
+                contentType: false,
+                enctype: "multipart/form-data",
+                processData: false,
+                success: (response) => {
+                    location.reload()
+                },
+                error: function (request, status, error) {
+                    alert(request.responseJSON?.message || 'Terjadi kesalahan')
+                },
+            });
+        }
+    })
+    
+    $("#button-public-video").click(function(){
+        let isSure = confirm("Apakah anda yakin ingin membuat video ini menjadi public, artinya video akan muncul dan dapat dilihat pada papan virtual lab")
+        if(isSure){
+            const formData = new FormData()
+            formData.append("can_watch", true)
+            $.ajax({
+                url: `/api/videos/${ID}`,
+                type: "PUT",
+                data: formData,
+                async: false,
+                cache: false,
+                contentType: false,
+                enctype: "multipart/form-data",
+                processData: false,
+                success: (response) => {
+                    location.reload()
+                },
+                error: function (request, status, error) {
+                    alert(request.responseJSON?.message || 'Terjadi kesalahan')
+                },
+            });
+        }
+    })
+    
+    $("#button-edit-video").click(function(){
+        $("#popup-edit-video").removeClass("hidden")
+        $("body").addClass("no-scroll")
+    })
+    
+    $("#button-close-edit").click(function(){
+        $("#popup-edit-video").addClass("hidden")
+        $("body").removeClass("no-scroll")
+    })
+    
+    $("#comment").on("click", ".button-delete-comment", function(){
+        const isDelete = confirm("Apakah anda yakin ingin menghapus komentar ini?")
+        if(isDelete){
+            const COMMENT_ID = $(this).prev().text()
+            const formData = new FormData()
+            formData.append("comment_id", COMMENT_ID)
+            $.ajax({
+                url: `/api/videos/comments`,
+                type: "DELETE",
+                data: formData,
+                async: false,
+                cache: false,
+                contentType: false,
+                enctype: "multipart/form-data",
+                processData: false,
+                success: (response) => {
+                    alert("berhasil menghapus komentar")
+                    location.reload()
+                },
+                error: function (request, status, error) {
+                    alert(request.responseJSON?.message || 'Gagal menghapus komentar')
+                },
+            });
+        }
+    })
+
+    // Handle upload thumbnail pada edit video
+    $("#button-upload-thumbnail").click(function(){
+        $("#upload-thumbnail").click()
+    })
+    
+    $("#upload-thumbnail").change(function(){
+        const selectedFile = this.files[0];
+        if (selectedFile) {
+            if(selectedFile.size >= 2_097_152){
+                $("#upload-thumbnail").prop("type","text").prop("type","file")
+                $("#file-too-large-thumbnail").show()
+            }else{
+                $("#file-too-large-thumbnail").hide()
+                $("#thumbnail-placeholder").removeClass("hidden")
+                const fileURL = URL.createObjectURL(selectedFile);
+                $("#thumbnail-placeholder img").prop("src", fileURL)
+            }
+        }
+    })
+
+    // Button ketika user menyimpan perubahan edit
+    $("#button-save-edit").click(function(){
+        let isConfirm = confirm("apakah anda yakin ingin menyimpan perubahan?")
+        if(isConfirm){
+            $(`#form-edit-video`).submit(function(e){
+                e.preventDefault();
+                let formData = new FormData($(this)[0])
+                formData.set("title", escapeHTML(formData.get("title")));
+                formData.set("description", escapeHTML(formData.get("description")));
+
+                $.ajax({
+                    url: `/api/videos/${ID}`,
+                    type: "PUT",
+                    data: formData,
+                    async: false,
+                    cache: false,
+                    contentType: false,
+                    enctype: "multipart/form-data",
+                    processData: false,
+                    success: (response) => {
+                        location.reload()
+                    },
+                    error: function (request, status, error) {
+                        alert(request.responseJSON?.message || 'Gagal menyimpan perubahan')
+                    },
+                });
+            }).submit()
+        }
+    })
+
+    function escapeHTML(str) {
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    }
+
+    function waktuTerakhir(dateString) {
+        const sekarang = new Date();
+        const tanggal = new Date(dateString);
+
+        const selisih = sekarang.getTime() - tanggal.getTime();
+        const selisihDetik = Math.floor(selisih / 1000); // konversi selisih ke detik
+        const selisihMenit = Math.floor(selisihDetik / 60); // konversi selisih ke menit
+        const selisihJam = Math.floor(selisihMenit / 60); // konversi selisih ke jam
+
+        if (selisihJam < 1) {
+            if (selisihMenit < 1) {
+                return 'beberapa detik yang lalu';
+            } else {
+                return `${selisihMenit} menit lalu`;
+            }
+        } else if (selisihJam < 24) {
+            return `${selisihJam} jam lalu`;
+        } else {
+            const selisihHari = Math.floor(selisihJam / 24);
+            if (selisihHari < 7) {
+                return `${selisihHari} hari lalu`;
+            } else if (selisihHari < 30) {
+                const mingguLalu = Math.floor(selisihHari / 7);
+                return `${mingguLalu} minggu lalu`;
+            } else {
+                const bulanLalu = Math.floor(selisihHari / 30);
+                return `${bulanLalu} bulan lalu`;
+            }
+        }
+    }
+</script>

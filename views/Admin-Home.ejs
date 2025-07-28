@@ -1,0 +1,233 @@
+<%- include('./layouts/header'); -%>
+
+<div class="grid grid-cols-10">
+    <%- include('./layouts/sidebar'); -%>
+
+    <main class="col-span-8 bg-[#fafafa] min-h-screen pb-20">
+        <div class="border">
+            <div class="flex items-center justify-between p-5">
+                <p class="text-2xl font-medium text-black/70">Konten Virtual Lab</p>
+                <button id="delete-video-button" class="hidden bg-red-500 text-white font-medium text-sm px-8 py-2 rounded items-center gap-2"><i class="uil uil-trash-alt"></i> Delete Video</button>
+            </div>
+            <input type="text" id="video-search" placeholder="Filter" class="px-5 py-4 w-full border-solid border-0 border-t border-b border-gray-200">
+            <div class="px-5 flex flex-col gap-4 py-4">
+                <div class="grid divide-x items-center gap-3 grid-content font-medium text-sm">
+                    <input type="checkbox" name="" id="header-checkbox">
+                    <p>Video</p>
+                    <p></p>
+                    <p class="text-center"><i class="uil uil-eye"></i> Visibilitas</p>
+                    <p class="text-center"><i class="uil uil-upload"></i> Diupload</p>
+                    <p class="text-center"><i class="uil uil-comment-alt-question"></i> Berkomentar?</p>
+                    <p class="text-center"><i class="uil uil-comment-alt-dots"></i> Total Komentar</p>
+                </div>
+            </div>
+            <div id="grid-videos" class="flex flex-col">
+                
+            </div>
+        </div>
+    </main>
+</div>
+
+<%- include('./layouts/footer'); -%>
+
+<script>
+    GetAllVideos("")
+    let CHECKBOX = []
+
+    $("#video-search").on("input", function(){
+        let KEYWORD = $(this).val()
+        GetAllVideos(KEYWORD)
+    })
+
+    $(document).on("change", "input[type=checkbox]", function(){
+        const jumlahCheckboxTercheck = $('#grid-videos input[type="checkbox"]:checked').length;
+        if (jumlahCheckboxTercheck > 0) {
+            $('#delete-video-button').removeClass('hidden');
+        } else {
+            $('#delete-video-button').addClass('hidden');
+        }
+    })
+
+    $("#grid-videos").on("change", "input[type=checkbox]", function(){
+        if ($(this).is(":checked")) {
+            CHECKBOX.push($(this).data('video-id'));
+        } else {
+            const videoId = $(this).data('video-id');
+            const index = CHECKBOX.indexOf(videoId);
+            if (index !== -1) {
+                CHECKBOX.splice(index, 1);
+            }
+        }
+    });
+
+    $('#header-checkbox').change(function() {
+        const isChecked = $(this).is(':checked');
+        $('#grid-videos input[type="checkbox"]').each(function() {
+            $(this).prop('checked', isChecked);
+            const videoId = $(this).data('video-id');
+            if (isChecked) {
+                if (CHECKBOX.indexOf(videoId) === -1) {
+                    CHECKBOX.push(videoId);
+                }
+            } else {
+                const index = CHECKBOX.indexOf(videoId);
+                if (index !== -1) {
+                    CHECKBOX.splice(index, 1);
+                }
+            }
+        });
+    });
+    
+    $("#delete-video-button").click(function(){
+        let isSure = confirm("Apakah anda yakin ingin menghapus video ini? Video akan hilang selamanya dan anda tidak akan bisa mengaksesnya kembali")
+        if(isSure){
+            const formData = new FormData()
+            formData.append("id", JSON.stringify(CHECKBOX))
+            $.ajax({
+                url: `/api/videos`,
+                type: "DELETE",
+                data: formData,
+                async: false,
+                cache: false,
+                contentType: false,
+                enctype: "multipart/form-data",
+                processData: false,
+                success: (response) => {
+                    location.reload()
+                },
+                error: function (request, status, error) {
+                    alert(request.responseJSON.message)
+                },
+            });
+        }
+    })
+    
+    function GetAllVideos(keyword) {
+        $.get(`/api/videos?search=${encodeURIComponent(keyword)}`, function(response) {
+            const grid = document.getElementById("grid-videos");
+            grid.innerHTML = "";
+
+            const videos = response.videos || [];
+
+            if (videos.length === 0) {
+                const noVideoDiv = document.createElement("div");
+                noVideoDiv.className = "flex flex-col items-center justify-center h-[70vh] w-full";
+                noVideoDiv.innerHTML = `
+                    <img src="/img/not-found.png" width="50px" alt="">
+                    <p class="mt-4 font-medium text-sm">Video tidak ditemukan</p>
+                `;
+                grid.appendChild(noVideoDiv);
+                return;
+            }
+
+            videos.forEach(video => {
+                const wrapper = document.createElement("div");
+                wrapper.className = "divide-x grid items-center gap-3 px-5 py-2 grid-content hover:bg-gray-100";
+
+                const checkbox = document.createElement("input");
+                checkbox.type = "checkbox";
+                checkbox.dataset.videoId = video.id;
+                if (video.deletedAt) checkbox.classList.add("invisible");
+
+                const imgLink = document.createElement("a");
+                imgLink.href = `/admin/edit?video=${video.id}`;
+                const img = document.createElement("img");
+                img.src = video.thumbnail || "/img/no-img.jpg";
+                img.alt = "";
+                img.onerror = function () {
+                    this.src = "/img/no-img.jpg";
+                };
+                img.className = "w-full rounded-md aspect-video object-cover border-2 border-gray-200";
+                // img.width = "100";
+                imgLink.appendChild(img);
+
+                const contentDiv = document.createElement("div");
+                const statusLine = document.createElement("div");
+                statusLine.className = "flex items-center gap-2";
+
+                const deletedTag = document.createElement("span");
+                deletedTag.className = "bg-red-500 text-white px-2 py-0.5 rounded text-xs";
+                deletedTag.textContent = "deleted";
+                if (!video.deletedAt) deletedTag.classList.add("hidden");
+
+                const titleLink = document.createElement("a");
+                titleLink.className = "font-bold text-black/80 block line-clamp-2";
+                titleLink.href = video.deletedAt ? "#" : `/admin/edit?video=${video.id}`;
+                titleLink.textContent = video.title;
+
+                statusLine.appendChild(deletedTag);
+                statusLine.appendChild(titleLink);
+                contentDiv.appendChild(statusLine);
+
+                const desc = document.createElement("p");
+                desc.className = "text-sm mt-1 text-black/80 leading-none line-clamp-2";
+                desc.textContent = video.description || "";
+                if (video.deletedAt) desc.classList.add("hidden");
+                contentDiv.appendChild(desc);
+
+                const vis = document.createElement("p");
+                vis.className = "flex items-center justify-center text-center font-medium gap-1";
+                vis.innerHTML = video.can_watch
+                    ? `<i class="uil uil-globe text-lg text-green-600"></i><span class="text-sm text-green-600">Publik</span>`
+                    : `<i class="uil uil-lock text-lg text-red-500"></i><span class="text-sm text-red-500">Private</span>`;
+
+                const date = document.createElement("p");
+                date.className = "text-sm text-center";
+                date.textContent = konversiFormatWaktu(video.createdAt);
+
+                const commentAble = document.createElement("p");
+                commentAble.className = "flex items-center justify-center text-center gap-1";
+                commentAble.innerHTML = video.can_comment
+                    ? `<i class="uil uil-check text-green-600"></i><span class="text-sm">Bisa</span>`
+                    : `<i class="uil uil-times text-red-600"></i><span class="text-sm">Tidak Bisa</span>`;
+
+                const commentCount = document.createElement("p");
+                commentCount.className = "text-sm text-center";
+                commentCount.innerHTML = `${video.total_comment} <i class="uil uil-comment-alt-dots"></i>`;
+
+                wrapper.appendChild(checkbox);
+                wrapper.appendChild(imgLink);
+                wrapper.appendChild(contentDiv);
+                wrapper.appendChild(vis);
+                wrapper.appendChild(date);
+                wrapper.appendChild(commentAble);
+                wrapper.appendChild(commentCount);
+
+                grid.appendChild(wrapper);
+            });
+        }).fail(function(xhr, status, error) {
+            console.error('Error fetching videos:', error);
+            const grid = document.getElementById("grid-videos");
+            grid.innerHTML = `
+                <div class="flex flex-col items-center justify-center h-[70vh] w-full">
+                    <p class="mt-4 font-medium text-sm text-red-500">Gagal memuat data video</p>
+                </div>
+            `;
+        });
+    }
+
+
+    function konversiFormatWaktu(waktu) {
+        const dateObj = new Date(waktu);
+        const namaBulan = [
+            "Januari", "Februari", "Maret", "April", "Mei", "Juni",
+            "Juli", "Agustus", "September", "Oktober", "November", "Desember"
+        ];
+        const tanggal = dateObj.getDate();
+        const bulan = namaBulan[dateObj.getMonth()];
+        const tahun = dateObj.getFullYear();
+        const hasilKonversi = `${tanggal} ${bulan} ${tahun}`;
+
+        return hasilKonversi;
+    }
+
+    function escapeHTML(str) {
+        if (typeof str !== 'string') return str;
+        return str
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+    }
+</script>

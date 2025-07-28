@@ -1,0 +1,203 @@
+<%- include('./layouts/header'); -%>
+
+<div class="grid grid-cols-10">
+    <%- include('./layouts/sidebar'); -%>
+
+    <main class="col-span-8 bg-[#fafafa]">
+        <form id="form-upload-video" class="rounded-2xl shadow-lg bg-white">
+
+            <input type="file" name="upload_video" id="upload-video" class="hidden" accept="video/mp4,video/x-m4v,video/*">
+            <input type="file" name="upload_thumbnail" id="upload-thumbnail" class="hidden" accept="image/*">
+
+            <!-- MAIN CONFIGURATION -->
+            <div class="py-8 px-14">
+                <div class="flex mb-14 justify-between items-center">
+                    <p class="text-2xl font-semibold text-[#a382b6]">Details</p>
+                    <a href="/admin" class="text-sm font-medium text-[#a382b6]"><i class="uil uil-arrow-left"></i> Kembali ke Konten</a>
+                </div>
+                <div class="grid grid-cols-5 mt-4 gap-8">
+                    <!-- Video Information -->
+                    <div class="col-span-3 flex flex-col gap-6">
+                        <div class="relative">
+                            <input required maxlength="55" value="" name="title" type="text" id="video-title" class="block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border-1 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer" placeholder=" " />
+                            <label for="video-title" class="absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white dark:bg-gray-900 px-2 peer-focus:px-2 peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1">Judul (wajib diisi)</label>
+                        </div>
+        
+                        <div class="relative">
+                            <textarea name="description" type="text" maxlength="400" rows="8" id="video-desc" class="block px-2.5 pb-2.5 pt-4 w-full text-base text-gray-900 bg-transparent rounded-lg border-1 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer" placeholder=" "> </textarea>
+                            <label for="video-desc" class="absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white dark:bg-gray-900 px-2 peer-focus:px-2 peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1">Deskripsi video</label>
+                        </div>
+
+                        <div class="">
+                            <p class="font-medium">Thumbnail</p>
+                            <p class="text-sm text-black/60 pt-2 pb-5">Pilih atau upload gambar yang menunjukkan isi video Anda. Thumbnail yang bagus akan terlihat unik dan menarik perhatian penonton.</p>
+                            <p id="file-too-large-thumbnail" class="hidden text-red-500 font-medium text-sm pb-4">File too large, max thumbnail size 2mb</p>
+                            <div class="grid grid-cols-4 gap-4">
+                                <button type="button" id="button-upload-thumbnail" class="flex flex-col aspect-video items-center justify-center border border-gray-300 rounded-lg p-4">
+                                    <i class="uil uil-image-upload text-2xl text-black/70"></i>
+                                    <p class="text-sm font-medium text-black/70">Upload thumbnail</p>
+                                </button>
+                                <div id="thumbnail-placeholder" class="hidden">
+                                    <img src="/img/Placeholder.png" class="aspect-video rounded-md object-cover border" alt="">
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <div class="">
+                            <p class="font-medium">Komentar</p>
+                            <p class="text-sm text-black/60 pt-2 pb-5">Tentukan apakah video ini dapat dikomentari oleh orang lain.</p>
+                            <div class="flex flex-col gap-2">
+                                <div class="flex items-center gap-2">
+                                    <input checked type="radio" name="can_comment" id="radio-komen-ya" value="true">
+                                    <label class="font-medium text-black/80" for="radio-komen-ya">Ya, video ini bisa dikomentari</label>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <input type="radio" name="can_comment" id="radio-komen-tidak" value="false">
+                                    <label class="font-medium text-black/80" for="radio-komen-tidak">Tidak, tutup komentar video</label>
+                                </div>
+                            </div>
+                        </div>
+        
+                        
+                    </div>
+            
+                    <!-- Video Preview -->
+                    <div class="col-span-2">
+                        <div class="border border-gray-300 rounded-lg overflow-hidden sticky top-[6rem]">
+                            <video id="video-uploaded" width="320" height="240" controls class="w-full aspect-video">
+                                <source src="" type="video/mp4">
+                                Your browser does not support the video tag.
+                            </video>
+                            <div class="p-4 flex flex-col gap-4">
+                                <div class="">
+                                    <p class="text-black/60 text-sm font-medium">Nama file</p>
+                                    <p id="video-name" class="font-medium">test.mp4</p>
+                                </div>
+                                <div class="">
+                                    <p class="text-black/60 text-sm font-medium">Size file</p>
+                                    <p id="video-size" class="font-medium">32MB</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <hr>
+
+            <div class="flex justify-between py-6 px-14">
+                <p class="invisible"></p>
+                <button type="submit" class="text-white font-semibold text-sm px-8 py-2.5 bg-blue-500">UPLOAD VIDEO</button>
+            </div>
+        </form>
+    </main>
+</div>
+
+<div id="popup-upload-video" class="fixed top-0 bottom-0 right-0 left-0 bg-black/40 flex items-center justify-center z-[99]">
+    <div class="w-[90vw] lg:w-[60vw] bg-white rounded-xl overflow-hidden">
+        <div class="px-8 lg:px-14 py-8 h-[60vh] flex items-center justify-center flex-col">
+            <i class="uil uil-image-upload text-[100px] text-black/70"></i>
+            <p class="font-medium text-2xl">Pilih video yang ingin diupload</p>
+            <p class="mt-1 text-black/60 text-center">Video Anda akan bersifat pribadi sampai Anda memublikasikannya.</p>
+            <p id="file-too-large" class="hidden text-red-500 font-medium pt-4 text-sm">File too large, max.500mb</p>
+
+            <div class="flex gap-3">
+                <a href="/admin" class="mt-6 text-red-500 border border-red-500 bg-transparent font-semibold text-sm px-8 py-2.5 rounded-md flex items-center gap-2"><i class="uil uil-arrow-left"></i> Kembali</a >
+                <button type="button" id="button-upload-video" class="mt-6 text-white font-semibold text-sm px-8 py-2.5 bg-blue-500 rounded-md flex items-center gap-2"><i class="uil uil-upload"></i> Pilih File</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="popup-loading-upload" class="hidden fixed z-100 top-0 bottom-0 right-0 left-0 bg-black/40 flex items-center justify-center z-[99]">
+    <div class="w-[30vw] text-center flex justify-center flex-col items-center bg-white rounded-2xl overflow-hidden p-8">
+        <div class="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700">
+            <div id="status-bar" class="bg-blue-600 h-2.5 rounded-full" style="width: 1%"></div>
+        </div>
+        <p id="status" class="text-sm font-medium mt-4">0%</p>
+        <p class="text-sm font-medium mt-4">Sedang mengupload video, mohon untuk jangan menutup halaman</p>
+    </div>
+</div>
+
+<%- include('./layouts/footer'); -%>
+
+<script>
+    $("#button-link-upload-video").hide()
+    $("#form-seacrh").hide()
+    $("#button-upload-thumbnail").click(function(){$("#upload-thumbnail").click()})
+    $("#button-upload-video").click(function(){$("#upload-video").click()})
+
+    $("#upload-thumbnail").change(function(){
+        const selectedFile = this.files[0];
+        if (selectedFile) {
+            if(selectedFile.size >= 2_097_152){
+                $("#custom-input-resume").prop("type","text").prop("type","file")
+                $("#file-too-large-thumbnail").show()
+            }else{
+                $("#file-too-large-thumbnail").hide()
+                $("#thumbnail-placeholder").removeClass("hidden")
+                const fileURL = URL.createObjectURL(selectedFile);
+                $("#thumbnail-placeholder img").prop("src", fileURL)
+            }
+        }
+    })
+
+    $("#upload-video").change(function(){
+        const selectedFile = this.files[0];
+        if (selectedFile) {
+            // 500_233_290 = 500mb
+            if(selectedFile.size > 500_233_290){
+                $(this).prop("type","text").prop("type","file")
+                $("#file-too-large").show()
+            }else{
+                const videoUrl = URL.createObjectURL(selectedFile);
+                $("#video-uploaded source").attr("src", videoUrl);
+                // Handle video props 
+                $("#video-title").val(selectedFile.name)
+                $("#video-name").text(selectedFile.name)
+                $("#video-size").text(`${(selectedFile.size / (1024 * 1024)).toFixed(2)} MB`)
+
+
+                $("#video-uploaded")[0].load();
+                $("#popup-upload-video").addClass("hidden");
+
+            }
+        }
+    })
+
+    $("#form-upload-video").submit(function(e) {
+        e.preventDefault();
+        let formData = new FormData($(this)[0]);
+
+        const isConfirm = confirm("Apakah Anda yakin ingin mengunggah video tersebut?");
+
+        if (isConfirm) {
+            $("#popup-loading-upload").removeClass("hidden")
+            const ajax = new XMLHttpRequest();
+            ajax.upload.addEventListener("progress",progressHandler, false)
+            ajax.addEventListener("load", completeHandler, false);
+            ajax.open("POST", "/api/videos");
+            ajax.send(formData);
+        }
+    });
+
+
+    function progressHandler(event) {
+        // $("loaded_n_total").innerHTML = "Uploaded " + event.loaded + " bytes of " + event.total;
+        var percent = (event.loaded / event.total) * 100;
+        // $("progressBar").value = Math.round(percent);
+        $("#status-bar").css("width", `${Math.round(percent)}%`)
+        $("#status").text(Math.round(percent) + "% uploaded...")
+    }
+
+    function completeHandler(event) {
+        $("#status").addClass("hidden")
+        alert("berhasil mengupload video")
+        window.location.href = "/admin"
+    }
+
+    function parseJwt (token) {
+        return JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString());
+    }
+</script>

@@ -1,0 +1,205 @@
+<%- include('./layouts/header'); -%>
+
+<style>
+    .shadow-brutal{
+        box-shadow: 0 0 60px rgba(0, 0, 0, .1);
+    }
+</style>
+
+<main class="px-[7.5%] my-8">
+    <a href="/videos" class="font-semibold text-[#a382b6] flex items-center gap-2"><i class="uil uil-arrow-left"></i> Kembali ke Semua Video</a>
+    <div class="grid grid-cols-8 gap-6 mt-8">
+        <div class="col-span-8">
+            <video id="video" width="320" height="240" controls class="shadow-brutal w-full aspect-video border rounded-2xl border-gray-300 ">
+                <source src="" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+            <div class="mt-2">
+                <h2 id="title" class="text-2xl font-bold text-black/80 line-clamp-2">Video Title Kinda Long but No Problem</h2>
+                <p id="user" class="text-black/60">User who upload</p>
+                <div class="p-4 rounded-2xl w-full bg-gray-300/50 mt-4">
+                    <div class="flex items-center gap-2">
+                        <!-- <p class="font-semibold text-black/80 text-sm"><span id="views">100</span>x ditonton</p> -->
+                        <p class="font-semibold text-black/80 text-sm">Diunggah: <span id="postdate">1 bulan lalu</span></p>
+                    </div>
+                    <p id="desc" class="mt-2">Lorem ipsum dolor sit, amet consectetur adipisicing elit. Maxime ad rerum laboriosam, inventore labore quia nihil animi minus tempore officiis assumenda debitis eveniet molestiae ipsum, dolor amet porro beatae exercitationem ratione. Dolor minus hic eligendi tempore praesentium distinctio cum quas.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- COMMENT SECTION -->
+        <div id="comments-section" class="col-span-8 h-[90vh] border border-gray-300 rounded-2xl py-4 divide-y relative overflow-hidden">
+            <p class="px-4 font-medium text-lg text-black/80 mb-4">Comments Sections</p>
+
+            <form id="form-comment" class="px-4 py-3 flex items-center gap-2 bg-white">
+                <input type="text" name="content" id="input-content" placeholder="Tinggalkan komentar" class="w-full text-sm border-0 border-b-2 border-gray-300 focus:ring-0 focus:outline-none">
+                <button class="text-sm" type="submit">Kirim</button>
+            </form>
+
+            <!-- LIST OF COMMENT -->
+            <div id="comment" class="flex flex-col h-full overflow-y-scroll">
+                <!-- COMMENT -->
+                
+            </div>
+        </div>
+    </div>
+</main>
+
+<%- include('./layouts/footer'); -%>
+
+<script>
+    $("#form-seacrh").hide()
+
+    let EMAIL
+    const ID = (window.location.href).split("watch?video=").pop()
+
+    $.get(`/api/students/me`, userData => {
+        EMAIL = userData.email;
+
+        if (userData.role === "admin") {
+            $("#form-comment").remove(); // hapus form
+            $("#comments-section").prepend(`<p class="px-4 text-red-500">Admin tidak dapat memberikan komentar</p>`);
+        }
+    });
+
+
+
+    $.get(`/api/videos/${ID}`, videoData => {
+        videoData = videoData.video
+        const descriptionLines = videoData.description.split('\n');
+
+        $("#video source").prop("src", videoData.video_link);
+        $("#video")[0].load();
+
+        $("#title").text(videoData.title);
+        $("#postdate").text(waktuTerakhir(videoData.createdAt));
+        $("#user").text(videoData.Admin?.username ?? "Unknown");
+
+        const descElement = document.getElementById("desc");
+        descElement.innerHTML = "";
+        descriptionLines.forEach(line => {
+            const p = document.createElement("p");
+            p.innerText = line;
+            descElement.appendChild(p);
+        });
+
+        // Disable comments if not allowed
+        if (!videoData.can_comment || videoData.can_comment === "false") {
+            const commentsSection = $("#comments-section");
+            commentsSection.html("").removeClass("border");
+            commentsSection.append(`<p class="text-center">Video ini tidak dapat dikomentari</p>`);
+            return;
+        }
+
+        // Load comments
+        $.get(`/api/videos/comments?video=${ID}`, function (commentData) {
+            const commentContainer = document.getElementById("comment");
+            commentContainer.innerHTML = "";
+            commentData.forEach(comment => {
+                const wrapper = document.createElement("div");
+                wrapper.className = "px-4 py-2";
+
+                const email = escapeHTML(comment.student_email);
+                const content = escapeHTML(comment.content);
+                const time = waktuTerakhir(comment.createdAt);
+
+                wrapper.innerHTML = `
+                    <div class="">
+                        <div class="flex items-center gap-2">
+                            <p class="font-medium text-black/80">${email}</p>
+                            <p class="text-xs text-black/60">${time}</p>
+                        </div>
+                        <p class="text-sm">${content}</p>
+                    </div>
+                `;
+                commentContainer.appendChild(wrapper);
+            });
+        });
+    });
+
+
+    
+    $("#form-comment").submit(function (e) {
+        e.preventDefault();
+        const content = $("#input-content").val().trim();
+        if (!content) return;
+
+        const formData = new FormData($(this)[0]);
+
+        $.ajax({
+            url: `/api/videos/${ID}/comments`,
+            type: "POST",
+            data: formData,
+            async: true,
+            cache: false,
+            contentType: false,
+            processData: false,
+            success: (response) => {
+                const now = new Date();
+                const commentContainer = document.getElementById("comment");
+
+                const wrapper = document.createElement("div");
+                wrapper.className = "px-4 py-2";
+
+                const contentEscaped = escapeHTML(content);
+
+                wrapper.innerHTML = `
+                    <div class="">
+                        <div class="flex items-center gap-2">
+                            <p class="font-medium text-black/80">${escapeHTML(EMAIL)}</p>
+                            <p class="text-xs text-black/60">${waktuTerakhir(now.toISOString())}</p>
+                        </div>
+                        <p class="">${contentEscaped}</p>
+                    </div>
+                `;
+
+                commentContainer.prepend(wrapper);
+                $("#input-content").val("");
+            },
+            error: function (request) {
+                alert(request.responseJSON?.message || "Gagal mengirim komentar");
+            },
+        });
+    });
+
+    function escapeHTML(str) {
+        if (typeof str !== 'string') return str;
+        return str
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+    }
+
+    function waktuTerakhir(dateString) {
+        const sekarang = new Date();
+        const tanggal = new Date(dateString);
+
+        const selisih = sekarang.getTime() - tanggal.getTime();
+        const selisihDetik = Math.floor(selisih / 1000); // konversi selisih ke detik
+        const selisihMenit = Math.floor(selisihDetik / 60); // konversi selisih ke menit
+        const selisihJam = Math.floor(selisihMenit / 60); // konversi selisih ke jam
+
+        if (selisihJam < 1) {
+            if (selisihMenit < 1) {
+                return 'beberapa detik yang lalu';
+            } else {
+                return `${selisihMenit} menit lalu`;
+            }
+        } else if (selisihJam < 24) {
+            return `${selisihJam} jam lalu`;
+        } else {
+            const selisihHari = Math.floor(selisihJam / 24);
+            if (selisihHari < 7) {
+                return `${selisihHari} hari lalu`;
+            } else if (selisihHari < 30) {
+                const mingguLalu = Math.floor(selisihHari / 7);
+                return `${mingguLalu} minggu lalu`;
+            } else {
+                const bulanLalu = Math.floor(selisihHari / 30);
+                return `${bulanLalu} bulan lalu`;
+            }
+        }
+    }
+</script>

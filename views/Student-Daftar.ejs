@@ -1,0 +1,149 @@
+<%- include('./layouts/header'); -%>
+
+<main class="px-[20%] bg-[#fafafa] min-h-screen flex items-center justify-center">
+  <div class="rounded-md border border-gray-300 bg-white w-full">
+    <!-- Register Form -->
+    <form id="form-register" class="grid grid-cols-1 md:grid-cols-2 overflow-hidden">
+      <div class="bg-[#a382b6] flex items-center justify-center p-6">
+        <img src="/img/logo.png" width="200px" alt="Virtual Lab Logo" />
+      </div>
+      <div class="flex flex-col items-center justify-center p-8">
+        <p class="text-black/80 font-thin mb-4 text-lg">- Tour Virtual Lab -</p>
+        <h1 class="font-medium text-2xl">Daftar</h1>
+        <p class="text-sm text-black/60 text-center">untuk melanjutkan ke <strong>virtual lab</strong></p>
+
+        <div class="mt-8 w-full max-w-[300px]">
+          <div class="relative mb-4">
+            <input name="email" type="email" id="email" required
+              class="peer block w-full px-2.5 pb-1 pt-4 text-sm text-gray-900 bg-transparent rounded-lg border border-gray-300 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              placeholder=" " />
+            <label for="email"
+              class="absolute text-sm text-gray-500 duration-300 transform scale-75 top-2 z-10 origin-[0] bg-white px-2 peer-placeholder-shown:scale-100 peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 left-2">
+              Email
+            </label>
+          </div>
+
+          <div class="relative mb-6">
+            <input name="password" type="password" id="password" required
+              class="peer block w-full px-2.5 pb-1 pt-4 text-sm text-gray-900 bg-transparent rounded-lg border border-gray-300 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              placeholder=" " />
+            <label for="password"
+              class="absolute text-sm text-gray-500 duration-300 transform scale-75 top-2 z-10 origin-[0] bg-white px-2 peer-placeholder-shown:scale-100 peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 left-2">
+              Password
+            </label>
+          </div>
+
+          <button type="submit"
+            class="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold text-sm px-8 py-2.5 rounded-full transition">
+            Kirim Verifikasi
+          </button>
+
+          <p class="text-xs mt-4 text-center">
+            Sudah punya akun? <a href="/login" class="text-blue-500 hover:underline">Masuk</a>
+          </p>
+
+          <p id="register-error" class="text-red-500 text-xs mt-3 text-center hidden"></p>
+        </div>
+      </div>
+    </form>
+
+    <!-- Verification Form -->
+    <form id="form-verification" class="hidden flex-col items-center p-8">
+      <h1 class="font-medium text-2xl">Verifikasi Kode</h1>
+      <p class="text-sm text-black/60 mt-1 text-center">
+        Silakan cek email untuk mendapatkan <strong>kode verifikasi</strong>
+      </p>
+
+      <input type="text" name="verification_code" maxlength="6" required
+        class="w-full max-w-[200px] text-center mt-4 p-2 border border-gray-300 rounded-lg" />
+
+      <button type="submit"
+        class="mt-6 bg-blue-500 hover:bg-blue-600 text-white font-semibold text-sm px-8 py-2.5 rounded-full transition">
+        Verifikasi
+      </button>
+
+      <p id="verify-error" class="text-red-500 text-xs mt-3 text-center hidden"></p>
+    </form>
+  </div>
+</main>
+
+<%- include('./layouts/footer'); -%>
+
+<script>
+  const formRegister = document.getElementById("form-register");
+  const formVerification = document.getElementById("form-verification");
+  const registerError = document.getElementById("register-error");
+  const verifyError = document.getElementById("verify-error");
+
+  let savedEmail = "";
+  let savedPassword = "";
+
+  formRegister.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    registerError.classList.add("hidden");
+
+    const email = formRegister.email.value.trim();
+    const password = formRegister.password.value.trim();
+
+    if (!email || !password) {
+      registerError.textContent = "Email dan password wajib diisi.";
+      registerError.classList.remove("hidden");
+      return;
+    }
+
+    try {
+      const res = await fetch("/api/ask-verification", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Gagal mengirim verifikasi.");
+
+      savedEmail = email;
+      savedPassword = password;
+
+      formRegister.classList.add("hidden");
+      formVerification.classList.remove("hidden");
+      alert(data.message); // atau tampilkan UI feedback lebih bagus di div
+    } catch (err) {
+      registerError.textContent = err.message;
+      registerError.classList.remove("hidden");
+    }
+  });
+
+  formVerification.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    verifyError.classList.add("hidden");
+
+    const code = formVerification.verification_code.value.trim();
+
+    if (!code) {
+      verifyError.textContent = "Kode verifikasi tidak boleh kosong.";
+      verifyError.classList.remove("hidden");
+      return;
+    }
+
+    try {
+      const res = await fetch("/api/students/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: savedEmail,
+          password: savedPassword,
+          verification_code: code,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Gagal registrasi.");
+
+      alert("Akun berhasil dibuat, silakan login.");
+      window.location.href = "/login";
+    } catch (err) {
+      verifyError.textContent = err.message;
+      verifyError.classList.remove("hidden");
+    }
+  });
+</script>
